@@ -1,9 +1,10 @@
+
 public class Trie<T> {
 
 	private TrieNode<T> root;
 
 	public Trie() {
-		root = new TrieNode<T>();
+		//root = new TrieNode<T>();
 	}
 	
 	
@@ -13,7 +14,7 @@ public class Trie<T> {
 	 */
 	public void insert(String word, T data) {
 		if(word != null && !word.isEmpty() && word.matches("[a-zA-Z]+")) {
-			root.insert(word.toLowerCase(), data);
+			//root.insert(word.toLowerCase(), data);
 		}
 	}
 	
@@ -28,7 +29,7 @@ public class Trie<T> {
 		
 		// Proberen een node te vinden van de laatste letter van de prefix
 		for(int i = 0; i < prefix.length(); i++) {
-			lastNode = lastNode.findNode(prefix.substring(i, i+1));
+			//lastNode = lastNode.findNode(prefix.substring(i, i+1));
 			
 			// Indien er geen node gevonden is: null terug geven
 			if(lastNode == null) {
