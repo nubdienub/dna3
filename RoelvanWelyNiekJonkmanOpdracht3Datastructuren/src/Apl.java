@@ -6,6 +6,7 @@ public class Apl {
 		
 		root.woordToevoegen("hoi", "onzin");
 		root.woordToevoegen("home", "onzin");
+		
 		System.out.println(root.toString());
 	}
 

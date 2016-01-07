@@ -51,23 +51,36 @@ public class TrieNode<T> {
 	 * @param data de extra data die wordt toegevoegd
 	 */
 	public void woordToevoegen(String woord,T data){
-		this.isBlad = false;
+		
+		//Check of het niet t laatste node is van een woord
+		if(kinderen.size() > 0){
+			isBlad = false;
+		}
 		
 		TrieNode<T> kindMetKarakter = null;
-		String karakter = woord.substring(0,1);
+		String subKarakter = woord.substring(0,1);
 		
+		//Kijk of er kinderen zijn die het karakter al bevatten
+		//Als dat zo is dan sla je de node van dat kind op
 		for(TrieNode<T> kind : kinderen){
-			if(kind.getKarakter() == karakter){
+			if(kind.getKarakter() == subKarakter){
 				kindMetKarakter = kind;
 			}
 		}
 		
-		if(kindMetKarakter == null){
-			kindMetKarakter = new TrieNode<T>(data,karakter);
+		//Als het karakter nog niet bekend is en je bent bij een blad, dan wordt het karakter toegevoegd
+		//Als het karakter nog niet bekend is maar je bent niet bij een blad
+		//maak dan een nieuwe node met de data en karakter(s)
+		if(kindMetKarakter == null && isBlad ){
+			karakter += subKarakter;
+		}else if(kindMetKarakter == null){
+			kindMetKarakter = new TrieNode<T>(data,subKarakter);
 			kindMetKarakter.ouder = this;
 			kinderen.add(kindMetKarakter);
 		}
 		
+		//Als het woord nog een lengte heeft meer dan 1 dan zijn
+		//er nog karakters om te verdelen.
 		if(woord.length() > 1){
 			kindMetKarakter.woordToevoegen(woord.substring(1), data);
 		}else{
@@ -77,37 +90,8 @@ public class TrieNode<T> {
 	
 	public void woordVerwijderen(String woord){
 		
-		if(kinderen.size() > 0){	
-			for(int i = 0; i < kinderen.size(); i++) {
-				TrieNode<T> kindMetWoord = kinderen.get(i);
-				if(kindMetWoord.karakter.equals(woord)){
-					kindMetWoord = null;
-					kinderen.remove(i);
-					isBlad = kinderen.size() == 0;
-					break;
-				}
-			}		
-		}
+
+	}
 		
-		if(isBlad) {
-			ouder.woordVerwijderen(woord);
-		}
-	}
-	
-	@Override
-	public String toString() {
-		String result = "digraph heap {\n";
-		return result + toDot() + "\n}";
-	}
-	
-	private String toDot() {
-		String res = " [label=\"" + karakter + " data" + "\"]\n";
-		for (TrieNode<T> aChild : kinderen) {
-			res += aChild.toDot();
-		}
-		return res;
-	}
-	
-	
 	
 }
