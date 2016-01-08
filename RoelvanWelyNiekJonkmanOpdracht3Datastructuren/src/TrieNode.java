@@ -2,8 +2,8 @@ import java.util.ArrayList;
 
 public class TrieNode<T> {
 
-	private boolean isBlad;
-	private String karakter;
+	private boolean isBlad,isRoot;
+	private String karakter = "";
 	private T data;
 	private TrieNode<T> ouder;
 	private ArrayList<TrieNode<T>> kinderen;
@@ -15,6 +15,7 @@ public class TrieNode<T> {
 	public TrieNode() {
 		kinderen = new ArrayList<TrieNode<T>>();
 		isBlad = true;
+		isRoot = true;
 	}
 	
 	/**
@@ -54,7 +55,7 @@ public class TrieNode<T> {
 	 */
 	public TrieNode<T> getKindMetKarakter(String subKarakter){
 		for(TrieNode<T> kind : kinderen){
-			if(kind.getKarakter() == subKarakter){
+			if(kind.getKarakter().substring(0, 1).equals(subKarakter)){
 				return kind;
 			}
 		}
@@ -69,7 +70,11 @@ public class TrieNode<T> {
 	public boolean controleerBlad(){
 		if(kinderen.size() > 0){
 			return false;
-		}else{
+		}
+		else if(isRoot){
+			return false;
+		}
+		else{
 			return true;
 		}
 	}
@@ -82,39 +87,72 @@ public class TrieNode<T> {
 	 */
 	public void woordToevoegen(String woord,T data){
 		
-		//Check of het niet t laatste node is van een woord
 		isBlad = controleerBlad();
-		
+
 		TrieNode<T> kindMetKarakter = null;
 		String subKarakter = woord.substring(0,1);
-		
-		//Kijk of er kinderen zijn die het karakter al bevatten
-		//Als dat zo is dan sla je de node van dat kind op
+
 		kindMetKarakter = getKindMetKarakter(subKarakter);
-	
-		//Als het karakter nog niet bekend is en je bent bij een blad, dan wordt het karakter toegevoegd
-		//Als het karakter nog niet bekend is maar je bent niet bij een blad
-		//maak dan een nieuwe node met de data en karakter(s)
+		
 		if(kindMetKarakter == null && isBlad ){
-			karakter += subKarakter;
+			karakter += subKarakter;	
+			this.data = data;
 		}else if(kindMetKarakter == null){
 			kindMetKarakter = new TrieNode<T>(data,subKarakter);
 			kindMetKarakter.ouder = this;
 			kinderen.add(kindMetKarakter);
-		}else if(kindMetKarakter != null && karakter.length() > 1){
-			//het kind met karakter moet nu alleen komen te staan
-			//en de rest van de karakters worden een nieuwe node
-			
+		}else if(kindMetKarakter != null && kindMetKarakter.karakter.length() > 1){
+			TrieNode<T> gespletenKindMetKarakter = new TrieNode<T>(data,kindMetKarakter.karakter.substring(1, kindMetKarakter.karakter.length()));
+			kindMetKarakter.karakter = subKarakter;
+			kindMetKarakter.kinderen.add(gespletenKindMetKarakter);
+			gespletenKindMetKarakter.ouder = kindMetKarakter;
 		}
 		
-		//Als het woord nog een lengte heeft meer dan 1 dan zijn
-		//er nog karakters om te verdelen.
 		if(woord.length() > 1){
-			kindMetKarakter.woordToevoegen(woord.substring(1), data);
-		}else{
-			kindMetKarakter.data = data;
-		}			
+			if(kinderen.size() > 0){
+				kindMetKarakter.woordToevoegen(woord.substring(1), data);
+			}else{
+				woordToevoegen(woord.substring(1), data);
+			}
+		}		
 	}
+	
+	
+	public String toDOTString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("diagraph mijngraaf {\n");
+		
+		ArrayList<TrieNode<T>> lookup = new ArrayList<TrieNode<T>>();
+		lookup.add(this);
+		
+		for (int i = 0; i < lookup.size(); i++) {
+			TrieNode<T> currentNode = lookup.get(i);
+			for (TrieNode<T> child : currentNode.kinderen) {
+				if (!lookup.contains(child)){
+					lookup.add(child);
+				}
+			}
+		}
+		
+		for(TrieNode<T> node : lookup){
+			sb.append(String.format("n%d [label=\"%s\"];\n", lookup.indexOf(node),node.karakter));
+		}
+		
+		for(TrieNode<T> node : lookup){
+			for (TrieNode<T> child : node.kinderen) {
+				sb.append(String.format("n%d -> n%d;\n",lookup.indexOf(node),lookup.indexOf(child)));
+			}
+		}
+		
+		sb.append("}");
+		
+		return sb.toString();
+	}
+	
+	
+	
+	
+
 	
 	/**
 	 * Verwijder methode die eerst checkt of deze node kinderen heeft
@@ -146,7 +184,6 @@ public class TrieNode<T> {
 		}
 
 	}
-	
 	/**
 	 * Zoekt s in de kinderen van de huidige node, zodra deze s gelijk is aan karakter van kind,
 	 * return dit kind (node)
