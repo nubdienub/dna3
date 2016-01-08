@@ -116,10 +116,53 @@ public class TrieNode<T> {
 		}			
 	}
 	
-	public void woordVerwijderen(String woord){
+	/**
+	 * Verwijder methode die eerst checkt of deze node kinderen heeft
+	 * zo ja: haal elk kind op en maak deze null (maak isBlad als kinderen.size 0 is)
+	 * zo nee: is het een blad? Vraag het dus aan zijn parent (1tje omhoog) (recursief)
+	 * @param s > te verwijderen woord
+	 */
+	public void woordVerwijderen(String s){
+		System.out.println("Te verwijderen: " + s);
+		// Zoeken naar het te verwijderen character
+		if(kinderen.size() > 0){ 
+			for(int i = 0; i < kinderen.size(); i++) {
+				TrieNode<T> kind = kinderen.get(i);
+				if(kind != null && kind.kinderen.equals(s)) {
+					System.out.println("kind " + s + " wordt null!");
+					kind = null;
+					kinderen.remove(i);
+					isBlad = kinderen.size() == 0;
+					break;
+				}
+				
+				//TODO iets met isWord hier nog?
+			}
+		}
 		
+		// Indien blad, vraag parent om zich te verwijderen
+		if(isBlad) {
+			ouder.woordVerwijderen(karakter);
+		}
 
 	}
+	
+	/**
+	 * Zoekt s in de kinderen van de huidige node, zodra deze s gelijk is aan karakter van kind,
+	 * return dit kind (node)
+	 * @param s
+	 * @return het kind
+	 */
+	public TrieNode<T> vindNode(String s) {
+		for(TrieNode<T> kind : kinderen) {
+			if(s != null && kind.karakter != null && s.equals(kind.karakter)) {
+				return kind;
+			}
+		}
+		return null;
+	}
+	
+	
 		
 	
 }
